@@ -1,43 +1,20 @@
 import { useEffect, useState, useRef } from "react"
 import { Input } from "./component/Input"
-
+import  {typeOptions, sortOptions, directionOptions} from "./data/option"
 interface RepositoryProps {
   id: number;
   full_name: string;
 }
-
-interface queryParamsState{
+interface queryParamsProps{
   type: string,
   sort: string,
   direction: string
 }
 
-const typeOptions = [
-  {value: 'all', text: 'All'},
-  {value: 'public', text: 'Public'},
-  {value: 'private', text: 'Private'},
-  {value: 'forks', text: 'Forks'},
-  {value: 'sources', text: 'Sources'},
-  {value: 'member', text: 'Member'},
-]
-
-const sortOptions = [
-  {value: 'created', text: 'Created'},
-  {value: 'updated', text: 'Updated'},
-  {value: 'pushed', text: 'Pushed'},
-  {value: 'full_name', text: 'Full Name'},
-]
-
-const directionOptions = [
-  {value: 'asc', text: 'Ascend'},
-  {value: 'desc', text: 'Descend'},
-]
-
-
 function App() {
   const queryTerm = new URLSearchParams(window.location.search).get('q');
   
-  const [queryParams, setQueryParams] = useState<queryParamsState>({
+  const [queryParams, setQueryParams] = useState<queryParamsProps>({
     type: typeOptions[0].value,
     sort: sortOptions[0].value,
     direction: directionOptions[1].value
