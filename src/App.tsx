@@ -36,44 +36,70 @@ function App() {
   const queryTerm = new URLSearchParams(window.location.search).get('q');
   const [input, setInput] = useState<string>(queryTerm || '')
   const [queryParams, setQueryParams] = useState<queryParamsState>({
-    type: 'all',
-    sort: 'created',
-    direction: 'desc'
+    type: typeOptions[0].value,
+    sort: sortOptions[0].value,
+    direction: directionOptions[1].value
   })
-
   const [repositoryList, setRepositoryList] = useState<RepositoryProps[]>([])
   const endofPage = useRef<HTMLDivElement | null>(null)
   const observer = useRef<IntersectionObserver | null>(null)
   const paging = useRef<number>(1)
+  const [loading, setLoading] = useState<boolean>(false)
+  const [error, setError] = useState<Error|null>(null)
 
   useEffect(() => {
+   let controller: AbortController|null = null
     observer.current = new IntersectionObserver((entries) => {
       if (!paging.current) return
       if (!queryTerm) return
       if (entries[0].intersectionRatio <= 0) return
 
+      setLoading(true)
+
+      controller = new AbortController
+      const signal = controller.signal
+
       const { type, sort, direction } = queryParams
-      
       //abort when onMount
-      fetch(`https://api.github.com/orgs/${queryTerm}/repos?page=${paging.current}&type=${type}&sort=${sort}&direction=${direction}`)
-        //handle queryTerm error
-      .then((response) => response.json())
-      .then((data) => {
-        //handle end of page
-        if (!data.length) {
-          //ref change don't cause re=render
-          paging.current = 0
-          return
-        }
-        setRepositoryList((prev) => ([...prev, ...data]))
-        paging.current += 1
-     
-      })
+      fetch(`https://api.github.com/orgs/${queryTerm}/repos?page=${paging.current}&type=${type}&sort=${sort}&direction=${direction}`, {signal})
+        .then((response) => {
+          if (!response.ok) {
+            switch (response.status) {
+              case (404):
+                throw new Error(
+                  `${response.status} Not Found`
+                )
+              default:
+                throw new Error(
+                  `Error: The status is ${response.status}`
+                )
+            }
+          }
+          setError(null)
+          return response.json()
+        })
+        .then((data) => {
+          if (!data.length) {
+            paging.current = 0
+            throw new Error(
+              `No more repositories`
+            )
+          }
+          setRepositoryList((prev) => ([...prev, ...data]))
+          paging.current += 1
+          
+      
+        }).catch((err) => 
+          setError(err)
+        ).finally(() =>
+          setLoading(false)
+        )
     })
       endofPage.current && observer.current.observe(endofPage.current);
     return () => {
-        endofPage.current && observer.current?.unobserve(endofPage.current);
-      };
+      endofPage.current && observer.current?.unobserve(endofPage.current);
+      controller?.abort()
+    };
 
   }, [queryParams])
 
@@ -99,7 +125,6 @@ function App() {
   //input change cause component re-render
 
   console.log('re-render')
-  console.log(paging.current)
   return (
     <div>
       <div style={{position: 'sticky',top: '0',padding: '10px', background: 'white'}}>
@@ -125,13 +150,13 @@ function App() {
             </select>
         </div>
       </div>
-      {!repositoryList.length && queryTerm ?  <div>Loading</div>:''}
       {repositoryList.map((repository) => (
         <div key={repository.id} style={{ height: "50px", background: "lightgray", margin: "5px" }}>
           {repository.full_name}
         </div>
       ))}
-      {!paging.current ? <div>no further data</div>:'' }
+      {loading && <div>loading</div>}
+      {error && <div>{error.message}</div>}
       <div ref={endofPage} style={{ height: "50px", background: "tomato", margin: "5px" }} ></div>
     </div>
   );
