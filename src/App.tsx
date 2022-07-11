@@ -46,10 +46,9 @@ function App() {
   const observer = useRef<IntersectionObserver | null>(null)
   const paging = useRef<number>(1)
 
-
   useEffect(() => {
     observer.current = new IntersectionObserver((entries) => {
-      
+      if (!paging.current) return
       if (!queryTerm) return
       if (entries[0].intersectionRatio <= 0) return
 
@@ -61,6 +60,11 @@ function App() {
       .then((response) => response.json())
       .then((data) => {
         //handle end of page
+        if (!data.length) {
+          //ref change don't cause re=render
+          paging.current = 0
+          return
+        }
         setRepositoryList((prev) => ([...prev, ...data]))
         paging.current += 1
      
@@ -82,45 +86,54 @@ function App() {
   }
 
   function handleQueryParamsChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    setRepositoryList([])
+    paging.current = 1
+    
     const { name, value } = e.target
+
     setQueryParams(prev => ({
       ...prev, [name]:value
     }))
-    setRepositoryList([])
-    paging.current =1
+
   }
   //input change cause component re-render
 
+  console.log('re-render')
+  console.log(paging.current)
   return (
-    < >
-      <div>Search Bar</div>
-      <input
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        onKeyDown={(e) => {e.key === "Enter" && handleSearch()}}
-      />
-      <button onClick={handleSearch}>Search</button>
-      <div>
-          <label htmlFor="type-select">Type</label>
-          <select id="type-select" name="type" value={queryParams.type} onChange={(e)=>handleQueryParamsChange(e)}>
-            {typeOptions.map(({ value, text }) => <option key={value} value={value}>{text}</option>)}
-          </select>
-          <label>Sort</label>
-          <select id="sort-select" name="sort" value={queryParams.sort} onChange={(e)=>handleQueryParamsChange(e)}>
-            {sortOptions.map(({ value, text }) => <option key={value} value={value}>{text}</option>)}
-          </select >
-          <label>Direction</label>
-          <select id="direction-select" name="direction" value={queryParams.direction} onChange={(e)=>handleQueryParamsChange(e)}>
-            {directionOptions.map(({ value, text }) => <option key={value} value={value}>{text}</option>)}
-          </select>
+    <div>
+      <div style={{position: 'sticky',top: '0',padding: '10px', background: 'white'}}>
+        <div>Search Bar</div>
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) => {e.key === "Enter" && handleSearch()}}
+          />
+        <button onClick={handleSearch}>Search</button>
+        <div>
+            <label htmlFor="type-select">Type</label>
+            <select id="type-select" name="type" value={queryParams.type} onChange={(e)=>handleQueryParamsChange(e)}>
+              {typeOptions.map(({ value, text }) => <option key={value} value={value}>{text}</option>)}
+            </select>
+            <label>Sort</label>
+            <select id="sort-select" name="sort" value={queryParams.sort} onChange={(e)=>handleQueryParamsChange(e)}>
+              {sortOptions.map(({ value, text }) => <option key={value} value={value}>{text}</option>)}
+            </select >
+            <label>Direction</label>
+            <select id="direction-select" name="direction" value={queryParams.direction} onChange={(e)=>handleQueryParamsChange(e)}>
+              {directionOptions.map(({ value, text }) => <option key={value} value={value}>{text}</option>)}
+            </select>
+        </div>
       </div>
+      {!repositoryList.length && queryTerm ?  <div>Loading</div>:''}
       {repositoryList.map((repository) => (
         <div key={repository.id} style={{ height: "50px", background: "lightgray", margin: "5px" }}>
           {repository.full_name}
         </div>
       ))}
+      {!paging.current ? <div>no further data</div>:'' }
       <div ref={endofPage} style={{ height: "50px", background: "tomato", margin: "5px" }} ></div>
-    </>
+    </div>
   );
 }
 
