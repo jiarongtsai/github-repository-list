@@ -1,4 +1,6 @@
 import { useEffect, useState, useRef } from "react"
+import { Input } from "./component/Input"
+
 interface RepositoryProps {
   id: number;
   full_name: string;
@@ -34,7 +36,7 @@ const directionOptions = [
 
 function App() {
   const queryTerm = new URLSearchParams(window.location.search).get('q');
-  const [input, setInput] = useState<string>(queryTerm || '')
+  
   const [queryParams, setQueryParams] = useState<queryParamsState>({
     type: typeOptions[0].value,
     sort: sortOptions[0].value,
@@ -55,12 +57,12 @@ function App() {
       if (entries[0].intersectionRatio <= 0) return
 
       setLoading(true)
+      setError(null)
 
       controller = new AbortController
       const signal = controller.signal
 
       const { type, sort, direction } = queryParams
-      //abort when onMount
       fetch(`https://api.github.com/orgs/${queryTerm}/repos?page=${paging.current}&type=${type}&sort=${sort}&direction=${direction}`, {signal})
         .then((response) => {
           if (!response.ok) {
@@ -75,7 +77,6 @@ function App() {
                 )
             }
           }
-          setError(null)
           return response.json()
         })
         .then((data) => {
@@ -103,38 +104,25 @@ function App() {
 
   }, [queryParams])
 
-
-  function handleSearch() {
-    if(input === queryTerm) return
+  function reset() {
     setRepositoryList([])
     paging.current = 1
-    window.location.href = `./?q=${input}`
   }
 
   function handleQueryParamsChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    setRepositoryList([])
-    paging.current = 1
-    
+    reset()
     const { name, value } = e.target
-
     setQueryParams(prev => ({
       ...prev, [name]:value
     }))
-
   }
-  //input change cause component re-render
 
   console.log('re-render')
   return (
     <div>
       <div style={{position: 'sticky',top: '0',padding: '10px', background: 'white'}}>
         <div>Search Bar</div>
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => {e.key === "Enter" && handleSearch()}}
-          />
-        <button onClick={handleSearch}>Search</button>
+        <Input queryTerm={queryTerm} reset={reset} />
         <div>
             <label htmlFor="type-select">Type</label>
             <select id="type-select" name="type" value={queryParams.type} onChange={(e)=>handleQueryParamsChange(e)}>
@@ -163,3 +151,5 @@ function App() {
 }
 
 export default App;
+
+
