@@ -25,12 +25,16 @@ function App() {
   const endofPage = useRef<HTMLDivElement | null>(null);
   const observer = useRef<IntersectionObserver | null>(null);
   const paging = useRef<number>(1);
+
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
+
+  const [store, setStore] = useState<any>({});
 
   useEffect(() => {
     let controller: AbortController | null = null;
     observer.current = new IntersectionObserver((entries) => {
+      if (loading) return;
       if (!paging.current) return;
       if (!queryTerm) return;
       if (entries[0].intersectionRatio <= 0) return;
@@ -38,10 +42,23 @@ function App() {
       setLoading(true);
       setError(null);
 
+      const { type, sort, direction } = queryParams;
+      const searchCondition = `${type}_${sort}_${direction}_${paging.current}`;
+
+      if (paging.current === 1) {
+        window.scrollTo(0, 0);
+      }
+
+      if (store[searchCondition]) {
+        setRepositoryList((prev) => [...prev, ...store[searchCondition]]);
+        paging.current += 1;
+        setLoading(false);
+        return;
+      }
+
       controller = new AbortController();
       const signal = controller.signal;
 
-      const { type, sort, direction } = queryParams;
       fetch(
         `https://api.github.com/orgs/${queryTerm}/repos?page=${paging.current}&type=${type}&sort=${sort}&direction=${direction}`,
         { signal }
@@ -57,12 +74,14 @@ function App() {
             paging.current = 0;
             throw new Error(`No more data`);
           }
+          setStore((prev: {}) => ({ ...prev, [searchCondition]: data }));
           setRepositoryList((prev) => [...prev, ...data]);
           paging.current += 1;
         })
         .catch((err) => setError(err))
         .finally(() => setLoading(false));
     });
+
     endofPage.current && observer.current.observe(endofPage.current);
     return () => {
       endofPage.current && observer.current?.unobserve(endofPage.current);
