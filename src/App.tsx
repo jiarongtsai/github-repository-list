@@ -1,6 +1,8 @@
 import { useEffect, useState, useRef } from "react"
 import { Input } from "./component/Input"
-import  {typeOptions, sortOptions, directionOptions} from "./data/option"
+import { typeOptions, sortOptions, directionOptions } from "./data/option"
+import { Dropdown } from "./component/Dropdown"
+import { Repository } from "./component/Repository";
 interface RepositoryProps {
   id: number;
   full_name: string;
@@ -66,7 +68,6 @@ function App() {
           setRepositoryList((prev) => ([...prev, ...data]))
           paging.current += 1
           
-      
         }).catch((err) => 
           setError(err)
         ).finally(() =>
@@ -96,34 +97,24 @@ function App() {
 
   console.log('re-render')
   return (
-    <div>
+    <>
       <div style={{position: 'sticky',top: '0',padding: '10px', background: 'white'}}>
         <div>Search Bar</div>
         <Input queryTerm={queryTerm} reset={reset} />
         <div>
-            <label htmlFor="type-select">Type</label>
-            <select id="type-select" name="type" value={queryParams.type} onChange={(e)=>handleQueryParamsChange(e)}>
-              {typeOptions.map(({ value, text }) => <option key={value} value={value}>{text}</option>)}
-            </select>
-            <label>Sort</label>
-            <select id="sort-select" name="sort" value={queryParams.sort} onChange={(e)=>handleQueryParamsChange(e)}>
-              {sortOptions.map(({ value, text }) => <option key={value} value={value}>{text}</option>)}
-            </select >
-            <label>Direction</label>
-            <select id="direction-select" name="direction" value={queryParams.direction} onChange={(e)=>handleQueryParamsChange(e)}>
-              {directionOptions.map(({ value, text }) => <option key={value} value={value}>{text}</option>)}
-            </select>
+          {/* map type of keys */}
+          <Dropdown term="type" currentValue={queryParams.type} list={typeOptions} handleChange={handleQueryParamsChange} />
+          <Dropdown term="sort" currentValue={queryParams.sort} list={sortOptions} handleChange={handleQueryParamsChange} />
+          <Dropdown term="direction" currentValue={queryParams.direction} list={directionOptions} handleChange={handleQueryParamsChange} />
         </div>
       </div>
       {repositoryList.map((repository) => (
-        <div key={repository.id} style={{ height: "50px", background: "lightgray", margin: "5px" }}>
-          {repository.full_name}
-        </div>
+        <Repository key={repository.id} text={repository.full_name}/>
       ))}
       {loading && <div>loading</div>}
       {error && <div>{error.message}</div>}
-      <div ref={endofPage} style={{ height: "50px", background: "tomato", margin: "5px" }} ></div>
-    </div>
+      <div ref={endofPage} style={{ height: "50px", background: "tomato", margin: "5px" }} />
+    </>
   );
 }
 

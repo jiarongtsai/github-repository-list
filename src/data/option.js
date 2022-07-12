@@ -20,7 +20,3 @@ const directionOptions = [
 ];
 
 export { typeOptions, sortOptions, directionOptions };
-
-//option.map(item=>(
-item;
-//))
