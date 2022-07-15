@@ -80,5 +80,5 @@ export function useInfinitySearch({
     };
   }, [queryParams]);
 
-  return { repositoryList, loading, error };
+  return { repositoryList, setRepositoryList, loading, error };
 }

@@ -1,19 +1,10 @@
-import { useEffect, useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { options } from "./data/option";
+import { generateValue } from "./utils";
 import { Input } from "./component/Input";
 import { Dropdown } from "./component/Dropdown";
 import { Repository } from "./component/Repository";
-import { generateValue } from "./utils";
-import { Testing } from "./component/Testing";
-interface RepositoryProps {
-  id: number;
-  full_name: string;
-  homepage?: string; //link
-  name?: string; //use this as repository name
-  description?: string;
-  language?: string; //display as tag
-  stargazers_count?: number;
-}
+import { useInfinitySearch } from "./customHook/useInfinitySearch";
 interface queryParamsProps {
   [key: string]: string;
   type: string;
@@ -27,73 +18,19 @@ function App() {
   const [queryParams, setQueryParams] = useState<queryParamsProps>(
     generateValue(options)
   );
-  const [repositoryList, setRepositoryList] = useState<RepositoryProps[]>([]);
+  // const [repositoryList, setRepositoryList] = useState<RepositoryProps[]>([]);
   const endofPage = useRef<HTMLDivElement | null>(null);
   const observer = useRef<IntersectionObserver | null>(null);
   const paging = useRef<number>(1);
 
-  const [loading, setLoading] = useState<boolean>(false);
-  const [error, setError] = useState<Error | null>(null);
-
-  const [store, setStore] = useState<any>({});
-
-  useEffect(() => {
-    let controller: AbortController | null = null;
-    observer.current = new IntersectionObserver((entries) => {
-      if (loading) return;
-      if (!paging.current) return;
-      if (!queryTerm) return;
-      if (entries[0].intersectionRatio <= 0) return;
-
-      setLoading(true);
-      setError(null);
-
-      const { type, sort, direction } = queryParams;
-      const searchCondition = `${type}_${sort}_${direction}_${paging.current}`;
-
-      if (paging.current === 1) {
-        window.scrollTo(0, 0);
-      }
-
-      if (store[searchCondition]) {
-        setRepositoryList((prev) => [...prev, ...store[searchCondition]]);
-        paging.current += 1;
-        setLoading(false);
-        return;
-      }
-
-      controller = new AbortController();
-      const signal = controller.signal;
-
-      fetch(
-        `https://api.github.com/orgs/${queryTerm}/repos?page=${paging.current}&type=${type}&sort=${sort}&direction=${direction}`,
-        { signal }
-      )
-        .then((response) => {
-          if (!response.ok) {
-            throw new Error(`Error: The status is ${response.status}`);
-          }
-          return response.json();
-        })
-        .then((data) => {
-          if (!data.length) {
-            paging.current = 0;
-            throw new Error(`No more data`);
-          }
-          setStore((prev: {}) => ({ ...prev, [searchCondition]: data }));
-          setRepositoryList((prev) => [...prev, ...data]);
-          paging.current += 1;
-        })
-        .catch((err) => setError(err))
-        .finally(() => setLoading(false));
+  const { repositoryList, setRepositoryList, error, loading }: any =
+    useInfinitySearch({
+      observer,
+      paging,
+      queryTerm,
+      queryParams,
+      endofPage,
     });
-
-    endofPage.current && observer.current.observe(endofPage.current);
-    return () => {
-      endofPage.current && observer.current?.unobserve(endofPage.current);
-      controller?.abort();
-    };
-  }, [queryParams]);
 
   function reset() {
     setRepositoryList([]);
@@ -112,7 +49,6 @@ function App() {
   console.log("re-render");
   return (
     <>
-      <Testing />
       <div
         style={{
           position: "sticky",
@@ -135,7 +71,7 @@ function App() {
           ))}
         </div>
       </div>
-      {repositoryList.map((repository) => (
+      {repositoryList.map((repository: any) => (
         <Repository key={repository.id} text={repository.full_name} />
       ))}
       {loading && <div>loading</div>}
