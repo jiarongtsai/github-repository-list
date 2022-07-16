@@ -10,10 +10,8 @@ export interface QueryParamsState {
   
 export interface RepositoryProps {
   id: number;
-  full_name: string;
-  homepage?: string; //link
-  name?: string; //use this as repository name
-  description?: string;
-  language?: string; //display as tag
-  stargazers_count?: number;
+  html_url: string; 
+  name: string; 
+  language: string; 
+  stargazers_count: number;
 }
