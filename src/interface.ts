@@ -1,10 +1,11 @@
 export interface QueryParamsState {
-    [key: string]: any;
-    page: number;
-    queryTerm: string;
-    type: string;
-    sort: string;
-    direction: string;
+  [key: string]: any;
+  page: number;
+  queryTerm: string;
+  type: string;
+  sort: string;
+  direction: string;
+  currentResult: RepositoryProps[];
 }
   
 export interface RepositoryProps {

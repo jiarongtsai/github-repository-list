@@ -13,30 +13,21 @@ function App() {
   const [state, dispatch] = useReducer(queryParamsReducer, {
     page: 1,
     queryTerm: queryTerm || "",
+    currentResult: [],
     ...generateValue(options),
   });
   const endofPage = useRef<HTMLDivElement | null>(null);
   const observer = useRef<IntersectionObserver | null>(null);
 
-  const { repositoryList, setRepositoryList, error, loading }: any =
-    useInfinitySearch({
-      observer,
-      state,
-      dispatch,
-      endofPage,
-    });
-
-  function reset() {
-    setRepositoryList([]);
-    dispatch({
-      type: QueryParamsActionKind.RESET_PAGE,
-    });
-  }
+  const { error, loading } = useInfinitySearch({
+    observer,
+    state,
+    dispatch,
+    endofPage,
+  });
 
   function handleQueryParamsChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    setRepositoryList([]);
     const { name, value } = e.target;
-
     dispatch({
       type: QueryParamsActionKind.CHANGE_PARAMS,
       payload: {
@@ -59,7 +50,14 @@ function App() {
         }}
       >
         <div>Search Bar</div>
-        <Input queryTerm={queryTerm} reset={reset} />
+        <Input
+          queryTerm={queryTerm}
+          reset={() =>
+            dispatch({
+              type: QueryParamsActionKind.RESET_PAGE,
+            })
+          }
+        />
         <div>
           {options.map(({ term, list }) => (
             <Dropdown
@@ -72,7 +70,7 @@ function App() {
           ))}
         </div>
       </div>
-      {repositoryList.map((repository: RepositoryProps) => (
+      {state.currentResult.map((repository: RepositoryProps) => (
         <Repository key={repository.id} text={repository.full_name} />
       ))}
       {loading && <div>loading</div>}

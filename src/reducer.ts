@@ -1,4 +1,4 @@
-import { QueryParamsState } from "./interface";
+import { QueryParamsState, RepositoryProps } from "./interface";
 
 export enum QueryParamsActionKind {
     RESET_PAGE = "RESET_PAGE",
@@ -7,17 +7,24 @@ export enum QueryParamsActionKind {
     CHANGE_PARAMS = "CHANGE_PARAMS",
 }
 
-type PayloadAction = {
+type ChangeParamsAction = {
     type: string;
     payload: {
       name: string;
       value: string;
     };
+};
+  
+type LoadDataAction = {
+  type: string;
+  payload: {
+    nextPageData: RepositoryProps[]
   };
+};
 
 type NoPayloadAction = { type: string };
   
-type QueryParamsAction = PayloadAction | NoPayloadAction;
+type QueryParamsAction = ChangeParamsAction | LoadDataAction | NoPayloadAction;
   
 
 export  function queryParamsReducer(
@@ -26,21 +33,25 @@ export  function queryParamsReducer(
   ) {
     switch (action.type) {
       case QueryParamsActionKind.CHANGE_PARAMS:
-        const payloadAction = (action as PayloadAction).payload;
+        const ChangeParamsAction = (action as ChangeParamsAction).payload;
         return {
           ...state,
           page: 1,
-          [payloadAction.name]: payloadAction.value,
+          currentResult: [],
+          [ChangeParamsAction.name]: ChangeParamsAction.value,
         };
       case QueryParamsActionKind.RESET_PAGE:
         return {
           ...state,
+          currentResult: [],
           page: 1,
         };
       case QueryParamsActionKind.LOAD_NEXT_PAGE:
+        const LoadDataAction = (action as LoadDataAction).payload;
         return {
           ...state,
           page: state.page++,
+          currentResult: [...state.currentResult, ...LoadDataAction.nextPageData]
         };
       case QueryParamsActionKind.NO_MORE_PAGE:
         return {

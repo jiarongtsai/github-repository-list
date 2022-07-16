@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
 import { QueryParamsActionKind } from "../reducer";
-import { RepositoryProps } from "../interface";
 
 export function useInfinitySearch({
   observer,
@@ -8,7 +7,6 @@ export function useInfinitySearch({
   dispatch,
   endofPage,
 }: any) {
-  const [repositoryList, setRepositoryList] = useState<RepositoryProps[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [store, setStore] = useState<any>({});
@@ -25,16 +23,16 @@ export function useInfinitySearch({
       setLoading(true);
       setError(null);
 
-      const searchCondition = `page=${page}&type=${type}&sort=${sort}&direction=${direction}`;
-
       if (page === 1) {
         window.scrollTo(0, 0);
       }
 
+      const searchCondition = `page=${page}&type=${type}&sort=${sort}&direction=${direction}`;
+
       if (store[searchCondition]) {
-        setRepositoryList((prev) => [...prev, ...store[searchCondition]]);
         dispatch({
           type: QueryParamsActionKind.LOAD_NEXT_PAGE,
+          payload: { nextPageData: store[searchCondition] },
         });
         setLoading(false);
         return;
@@ -61,9 +59,9 @@ export function useInfinitySearch({
             throw new Error(`No more data`);
           }
           setStore((prev: {}) => ({ ...prev, [searchCondition]: data }));
-          setRepositoryList((prev) => [...prev, ...data]);
           dispatch({
             type: QueryParamsActionKind.LOAD_NEXT_PAGE,
+            payload: { nextPageData: data },
           });
         })
         .catch((err) => setError(err))
@@ -77,5 +75,5 @@ export function useInfinitySearch({
     };
   }, [state]);
 
-  return { repositoryList, setRepositoryList, loading, error };
+  return { loading, error };
 }
