@@ -1,52 +1,115 @@
-import { useState, useRef } from "react";
+import { useRef, useReducer } from "react";
 import { options } from "./data/option";
 import { generateValue } from "./utils";
 import { Input } from "./component/Input";
 import { Dropdown } from "./component/Dropdown";
 import { Repository } from "./component/Repository";
 import { useInfinitySearch } from "./customHook/useInfinitySearch";
-interface queryParamsProps {
-  [key: string]: string;
+
+// An enum with all the types of actions to use in our reducer
+enum QueryParamsActionKind {
+  RESET_PAGE = "RESET_PAGE",
+  LOAD_NEXT_PAGE = "LOAD_NEXT_PAGE",
+  NO_MORE_PAGE = "NO_MORE_PAGE",
+  CHANGE_PARAMS = "CHANGE_PARAMS",
+}
+
+// An interface for our actions
+interface QueryParamsAction {
+  type: QueryParamsActionKind;
+  // payload:
+  payload: {
+    key: string;
+    value: string;
+  };
+}
+// An interface for our state
+interface QueryParamsState {
+  [key: string]: any;
+  page: number;
+  queryTerm: string;
   type: string;
   sort: string;
   direction: string;
 }
 
+function queryParamsReducer(
+  state: QueryParamsState,
+  action: QueryParamsAction
+) {
+  const { type, payload } = action;
+  switch (type) {
+    case QueryParamsActionKind.RESET_PAGE:
+      return {
+        ...state,
+        page: 1,
+      };
+    case QueryParamsActionKind.LOAD_NEXT_PAGE:
+      return {
+        ...state,
+        page: state.page++,
+      };
+    case QueryParamsActionKind.NO_MORE_PAGE:
+      return {
+        ...state,
+        page: 0,
+      };
+    case QueryParamsActionKind.CHANGE_PARAMS:
+      return {
+        ...state,
+        page: 1,
+        [payload.key]: payload.value,
+      };
+    default:
+      return state;
+  }
+}
+
 function App() {
   const queryTerm = new URLSearchParams(window.location.search).get("q");
-
-  const [queryParams, setQueryParams] = useState<queryParamsProps>(
-    generateValue(options)
-  );
-  // const [repositoryList, setRepositoryList] = useState<RepositoryProps[]>([]);
+  const [state, dispatch] = useReducer(queryParamsReducer, {
+    page: 1,
+    queryTerm: queryTerm || "",
+    ...generateValue(options),
+  });
   const endofPage = useRef<HTMLDivElement | null>(null);
   const observer = useRef<IntersectionObserver | null>(null);
-  const paging = useRef<number>(1);
 
   const { repositoryList, setRepositoryList, error, loading }: any =
     useInfinitySearch({
       observer,
-      paging,
-      queryTerm,
-      queryParams,
+      state,
+      dispatch,
       endofPage,
     });
 
   function reset() {
     setRepositoryList([]);
-    paging.current = 1;
+    dispatch({
+      type: QueryParamsActionKind.RESET_PAGE,
+      payload: {
+        key: "",
+        value: "",
+      },
+    });
   }
 
   function handleQueryParamsChange(e: React.ChangeEvent<HTMLSelectElement>) {
-    reset();
+    setRepositoryList([]);
     const { name, value } = e.target;
-    setQueryParams((prev: queryParamsProps) => ({
-      ...prev,
-      [name]: value,
-    }));
+
+    dispatch({
+      type: QueryParamsActionKind.CHANGE_PARAMS,
+      payload: {
+        key: name,
+        value,
+      },
+    });
   }
 
   console.log("re-render");
+
+  console.log(state);
   return (
     <>
       <div
@@ -64,7 +127,7 @@ function App() {
             <Dropdown
               key={term}
               term={term}
-              currentValue={queryParams[term]}
+              currentValue={state[term]}
               list={list}
               handleChange={handleQueryParamsChange}
             />

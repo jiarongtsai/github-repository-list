@@ -12,9 +12,8 @@ interface RepositoryProps {
 
 export function useInfinitySearch({
   observer,
-  paging,
-  queryTerm,
-  queryParams,
+  state,
+  dispatch,
   endofPage,
 }: any) {
   const [repositoryList, setRepositoryList] = useState<RepositoryProps[]>([]);
@@ -25,24 +24,31 @@ export function useInfinitySearch({
   useEffect(() => {
     let controller: AbortController | null = null;
     observer.current = new IntersectionObserver((entries) => {
+      const { queryTerm, type, sort, direction, page } = state;
       if (loading) return;
-      if (!paging.current) return;
+      if (!page) return;
       if (!queryTerm) return;
       if (entries[0].intersectionRatio <= 0) return;
 
       setLoading(true);
       setError(null);
 
-      const { type, sort, direction } = queryParams;
-      const searchCondition = `${type}_${sort}_${direction}_${paging.current}`;
+      const searchCondition = `page=${page}&type=${type}&sort=${sort}&direction=${direction}`;
 
-      if (paging.current === 1) {
+      if (page === 1) {
         window.scrollTo(0, 0);
       }
 
       if (store[searchCondition]) {
         setRepositoryList((prev) => [...prev, ...store[searchCondition]]);
-        paging.current += 1;
+        // paging.current += 1;
+        dispatch({
+          type: "LOAD_NEXT_PAGE",
+          payload: {
+            key: "",
+            value: "",
+          },
+        });
         setLoading(false);
         return;
       }
@@ -51,7 +57,7 @@ export function useInfinitySearch({
       const signal = controller.signal;
 
       fetch(
-        `https://api.github.com/orgs/${queryTerm}/repos?page=${paging.current}&type=${type}&sort=${sort}&direction=${direction}`,
+        `https://api.github.com/orgs/${queryTerm}/repos?${searchCondition}`,
         { signal }
       )
         .then((response) => {
@@ -62,12 +68,24 @@ export function useInfinitySearch({
         })
         .then((data) => {
           if (!data.length) {
-            paging.current = 0;
+            dispatch({
+              type: "NO_MORE_PAGE",
+              payload: {
+                key: "",
+                value: "",
+              },
+            });
             throw new Error(`No more data`);
           }
           setStore((prev: {}) => ({ ...prev, [searchCondition]: data }));
           setRepositoryList((prev) => [...prev, ...data]);
-          paging.current += 1;
+          dispatch({
+            type: "LOAD_NEXT_PAGE",
+            payload: {
+              key: "",
+              value: "",
+            },
+          });
         })
         .catch((err) => setError(err))
         .finally(() => setLoading(false));
@@ -78,7 +96,7 @@ export function useInfinitySearch({
       endofPage.current && observer.current?.unobserve(endofPage.current);
       controller?.abort();
     };
-  }, [queryParams]);
+  }, [state]);
 
   return { repositoryList, setRepositoryList, loading, error };
 }
