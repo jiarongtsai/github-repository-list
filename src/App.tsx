@@ -1,73 +1,12 @@
 import { useRef, useReducer } from "react";
-import { options } from "./data/option";
-import { generateValue } from "./utils";
+import { useInfinitySearch } from "./customHook/useInfinitySearch";
+import { QueryParamsActionKind, queryParamsReducer } from "./reducer";
+import { RepositoryProps } from "./interface";
 import { Input } from "./component/Input";
 import { Dropdown } from "./component/Dropdown";
 import { Repository } from "./component/Repository";
-import { useInfinitySearch } from "./customHook/useInfinitySearch";
-
-// An enum with all the types of actions to use in our reducer
-enum QueryParamsActionKind {
-  RESET_PAGE = "RESET_PAGE",
-  LOAD_NEXT_PAGE = "LOAD_NEXT_PAGE",
-  NO_MORE_PAGE = "NO_MORE_PAGE",
-  CHANGE_PARAMS = "CHANGE_PARAMS",
-}
-
-// An interface for our actions
-
-type PayloadAction = {
-  type: string;
-  payload: {
-    name: string;
-    value: string;
-  };
-};
-type NoPayloadAction = { type: string };
-
-type QueryParamsAction = PayloadAction | NoPayloadAction;
-
-// An interface for our state
-interface QueryParamsState {
-  [key: string]: any;
-  page: number;
-  queryTerm: string;
-  type: string;
-  sort: string;
-  direction: string;
-}
-
-function queryParamsReducer(
-  state: QueryParamsState,
-  action: QueryParamsAction
-) {
-  switch (action.type) {
-    case QueryParamsActionKind.CHANGE_PARAMS:
-      const payloadAction = (action as PayloadAction).payload;
-      return {
-        ...state,
-        page: 1,
-        [payloadAction.name]: payloadAction.value,
-      };
-    case QueryParamsActionKind.RESET_PAGE:
-      return {
-        ...state,
-        page: 1,
-      };
-    case QueryParamsActionKind.LOAD_NEXT_PAGE:
-      return {
-        ...state,
-        page: state.page++,
-      };
-    case QueryParamsActionKind.NO_MORE_PAGE:
-      return {
-        ...state,
-        page: 0,
-      };
-    default:
-      return state;
-  }
-}
+import { options } from "./data/option";
+import { generateValue } from "./utils";
 
 function App() {
   const queryTerm = new URLSearchParams(window.location.search).get("q");
@@ -133,7 +72,7 @@ function App() {
           ))}
         </div>
       </div>
-      {repositoryList.map((repository: any) => (
+      {repositoryList.map((repository: RepositoryProps) => (
         <Repository key={repository.id} text={repository.full_name} />
       ))}
       {loading && <div>loading</div>}

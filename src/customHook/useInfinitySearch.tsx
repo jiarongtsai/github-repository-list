@@ -1,14 +1,6 @@
 import { useState, useEffect } from "react";
-
-interface RepositoryProps {
-  id: number;
-  full_name: string;
-  homepage?: string; //link
-  name?: string; //use this as repository name
-  description?: string;
-  language?: string; //display as tag
-  stargazers_count?: number;
-}
+import { QueryParamsActionKind } from "../reducer";
+import { RepositoryProps } from "../interface";
 
 export function useInfinitySearch({
   observer,
@@ -42,7 +34,7 @@ export function useInfinitySearch({
       if (store[searchCondition]) {
         setRepositoryList((prev) => [...prev, ...store[searchCondition]]);
         dispatch({
-          type: "LOAD_NEXT_PAGE",
+          type: QueryParamsActionKind.LOAD_NEXT_PAGE,
         });
         setLoading(false);
         return;
@@ -64,14 +56,14 @@ export function useInfinitySearch({
         .then((data) => {
           if (!data.length) {
             dispatch({
-              type: "NO_MORE_PAGE",
+              type: QueryParamsActionKind.NO_MORE_PAGE,
             });
             throw new Error(`No more data`);
           }
           setStore((prev: {}) => ({ ...prev, [searchCondition]: data }));
           setRepositoryList((prev) => [...prev, ...data]);
           dispatch({
-            type: "LOAD_NEXT_PAGE",
+            type: QueryParamsActionKind.LOAD_NEXT_PAGE,
           });
         })
         .catch((err) => setError(err))
