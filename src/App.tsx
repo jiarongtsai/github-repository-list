@@ -15,14 +15,18 @@ enum QueryParamsActionKind {
 }
 
 // An interface for our actions
-interface QueryParamsAction {
-  type: QueryParamsActionKind;
-  // payload:
+
+type PayloadAction = {
+  type: string;
   payload: {
-    key: string;
+    name: string;
     value: string;
   };
-}
+};
+type NoPayloadAction = { type: string };
+
+type QueryParamsAction = PayloadAction | NoPayloadAction;
+
 // An interface for our state
 interface QueryParamsState {
   [key: string]: any;
@@ -37,8 +41,14 @@ function queryParamsReducer(
   state: QueryParamsState,
   action: QueryParamsAction
 ) {
-  const { type, payload } = action;
-  switch (type) {
+  switch (action.type) {
+    case QueryParamsActionKind.CHANGE_PARAMS:
+      const payloadAction = (action as PayloadAction).payload;
+      return {
+        ...state,
+        page: 1,
+        [payloadAction.name]: payloadAction.value,
+      };
     case QueryParamsActionKind.RESET_PAGE:
       return {
         ...state,
@@ -53,12 +63,6 @@ function queryParamsReducer(
       return {
         ...state,
         page: 0,
-      };
-    case QueryParamsActionKind.CHANGE_PARAMS:
-      return {
-        ...state,
-        page: 1,
-        [payload.key]: payload.value,
       };
     default:
       return state;
@@ -87,10 +91,6 @@ function App() {
     setRepositoryList([]);
     dispatch({
       type: QueryParamsActionKind.RESET_PAGE,
-      payload: {
-        key: "",
-        value: "",
-      },
     });
   }
 
@@ -101,7 +101,7 @@ function App() {
     dispatch({
       type: QueryParamsActionKind.CHANGE_PARAMS,
       payload: {
-        key: name,
+        name,
         value,
       },
     });
@@ -109,7 +109,6 @@ function App() {
 
   console.log("re-render");
 
-  console.log(state);
   return (
     <>
       <div

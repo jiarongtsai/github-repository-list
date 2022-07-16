@@ -41,13 +41,8 @@ export function useInfinitySearch({
 
       if (store[searchCondition]) {
         setRepositoryList((prev) => [...prev, ...store[searchCondition]]);
-        // paging.current += 1;
         dispatch({
           type: "LOAD_NEXT_PAGE",
-          payload: {
-            key: "",
-            value: "",
-          },
         });
         setLoading(false);
         return;
@@ -70,10 +65,6 @@ export function useInfinitySearch({
           if (!data.length) {
             dispatch({
               type: "NO_MORE_PAGE",
-              payload: {
-                key: "",
-                value: "",
-              },
             });
             throw new Error(`No more data`);
           }
@@ -81,10 +72,6 @@ export function useInfinitySearch({
           setRepositoryList((prev) => [...prev, ...data]);
           dispatch({
             type: "LOAD_NEXT_PAGE",
-            payload: {
-              key: "",
-              value: "",
-            },
           });
         })
         .catch((err) => setError(err))
