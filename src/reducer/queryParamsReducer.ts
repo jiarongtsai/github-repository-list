@@ -1,4 +1,4 @@
-import { QueryParamsState, RepositoryProps } from "./interface";
+import { QueryParamsState, RepositoryProps } from "../interfaces/interface";
 
 export enum QueryParamsActionKind {
     RESET_PAGE = "RESET_PAGE",
@@ -50,7 +50,7 @@ export  function queryParamsReducer(
         const LoadDataAction = (action as LoadDataAction).payload;
         return {
           ...state,
-          page: state.page++,
+          page: state.page + 1,
           currentResult: [...state.currentResult, ...LoadDataAction.nextPageData]
         };
       case QueryParamsActionKind.NO_MORE_PAGE:

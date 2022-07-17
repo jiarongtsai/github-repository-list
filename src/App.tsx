@@ -1,15 +1,18 @@
 import { useRef, useReducer } from "react";
 import { Text, HStack, Flex } from "@chakra-ui/react";
-import { useInfinitySearch } from "./customHook/useInfinitySearch";
-import { QueryParamsActionKind, queryParamsReducer } from "./reducer";
-import { RepositoryProps } from "./interface";
-import { Navbar } from "./component/Navbar";
-import { SearchInput } from "./component/Input";
-import { Dropdown } from "./component/Dropdown";
-import { Repository } from "./component/Repository";
+import { useInfinitySearch } from "./hooks/useInfinitySearch";
+import {
+  QueryParamsActionKind,
+  queryParamsReducer,
+} from "./reducer/queryParamsReducer";
+import { RepositoryProps } from "./interfaces/interface";
+import { Navbar } from "./components/Navbar";
+import { SearchInput } from "./components/Input";
+import { Dropdown } from "./components/Dropdown";
+import { Repository } from "./components/Repository";
+import { Loader } from "./components/Loader";
 import { options } from "./data/option";
 import { generateValue } from "./utils";
-import { Loader } from "./component/Loader";
 
 function App() {
   const queryTerm = new URLSearchParams(window.location.search).get("q");
@@ -21,7 +24,6 @@ function App() {
   });
   const endofPage = useRef<HTMLDivElement | null>(null);
   const observer = useRef<IntersectionObserver | null>(null);
-
   const { error, loading } = useInfinitySearch({
     observer,
     state,

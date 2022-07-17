@@ -1,25 +1,24 @@
 import { useState, useEffect } from "react";
-import { QueryParamsActionKind } from "../reducer";
+import { QueryParamsActionKind } from "../reducer/queryParamsReducer";
 
 export function useInfinitySearch({
   observer,
   state,
   dispatch,
-  endofPage,
+  endofPage
 }: any) {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
   const [store, setStore] = useState<any>({});
+  const { queryTerm, type, sort, direction, page } = state;
 
   useEffect(() => {
     let controller: AbortController | null = null;
     observer.current = new IntersectionObserver((entries) => {
-      const { queryTerm, type, sort, direction, page } = state;
       if (loading) return;
       if (!page) return;
       if (!queryTerm) return;
-      if (entries[0].intersectionRatio <= 0) return;
-
+      if (!entries[0].isIntersecting) return;
       setLoading(true);
       setError(null);
 
@@ -47,7 +46,12 @@ export function useInfinitySearch({
       )
         .then((response) => {
           if (!response.ok) {
-            throw new Error(`Error: The status is ${response.status}`);
+            switch (response.status) {
+              case (404):
+                throw new Error(`${response.status} Not Found`);
+              default:
+                throw new Error(`Error: The status is ${response.status}`);
+            }
           }
           return response.json();
         })
@@ -56,6 +60,7 @@ export function useInfinitySearch({
             dispatch({
               type: QueryParamsActionKind.NO_MORE_PAGE,
             });
+            
             throw new Error(`No more data`);
           }
           setStore((prev: {}) => ({ ...prev, [searchCondition]: data }));
@@ -63,9 +68,10 @@ export function useInfinitySearch({
             type: QueryParamsActionKind.LOAD_NEXT_PAGE,
             payload: { nextPageData: data },
           });
+          
         })
         .catch((err) => setError(err))
-        .finally(() => setLoading(false));
+        .finally(() => setLoading(false))
     });
 
     endofPage.current && observer.current.observe(endofPage.current);
