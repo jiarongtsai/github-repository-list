@@ -41,7 +41,7 @@ Mainly complete the core function with **queryParamsReducer** and **useInfinityS
 2. Prevent re-fetching data by storing in a **useState**.
 3. Handle UI Stack(Error, Empty, and Loading) with **custom hooks**.
 
-### Feature Improvement
+### Future Improvement
 1. Split the data-fetching function into reusable hooks.
 
 ## Install
