@@ -12,6 +12,7 @@ export const SearchInput = ({ queryTerm, reset }: SearchInputProps) => {
 
   function handleSearch() {
     if (input === queryTerm) return;
+    if (!input) return;
     window.location.href = `./?q=${input}`;
     reset();
   }

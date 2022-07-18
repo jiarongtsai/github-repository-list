@@ -18,7 +18,6 @@ function App() {
   const queryTerm = new URLSearchParams(window.location.search).get("q");
   const [state, dispatch] = useReducer(queryParamsReducer, {
     page: 1,
-    queryTerm: queryTerm || "",
     currentResult: [],
     ...generateValue(options),
   });
@@ -26,9 +25,19 @@ function App() {
   const observer = useRef<IntersectionObserver | null>(null);
   const { error, loading } = useInfinitySearch({
     observer,
-    state,
-    dispatch,
     endofPage,
+    url:
+      queryTerm &&
+      `https://api.github.com/orgs/${queryTerm}/repos?page=${state.page}&type=${state.type}&sort=${state.sort}&direction=${state.direction}`,
+    noMoreDataFunction: () =>
+      dispatch({
+        type: QueryParamsActionKind.NO_MORE_PAGE,
+      }),
+    fetchingNewDataFunction: (data: []) =>
+      dispatch({
+        type: QueryParamsActionKind.LOAD_NEXT_PAGE,
+        payload: { nextPageData: data },
+      }),
   });
 
   function handleQueryParamsChange(name: string, value: string) {

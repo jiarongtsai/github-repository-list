@@ -1,7 +1,6 @@
 export interface QueryParamsState {
   [key: string]: any;
   page: number;
-  queryTerm: string;
   type: string;
   sort: string;
   direction: string;
