@@ -1,6 +1,10 @@
 import { useState, useEffect } from "react";
 import { QueryParamsActionKind } from "../reducer/queryParamsReducer";
 
+interface storeState{
+  [unknownKey: string]: []
+}
+
 export function useInfinitySearch({
   observer,
   state,
@@ -9,9 +13,10 @@ export function useInfinitySearch({
 }: any) {
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<Error | null>(null);
-  const [store, setStore] = useState<any>({});
+  const [store, setStore] = useState<storeState>({});
   const { queryTerm, type, sort, direction, page } = state;
 
+  console.log(store)
   useEffect(() => {
     let controller: AbortController | null = null;
     observer.current = new IntersectionObserver((entries) => {

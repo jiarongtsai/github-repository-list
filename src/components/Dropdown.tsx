@@ -8,12 +8,24 @@ import {
   Button,
 } from "@chakra-ui/react";
 import { ChevronDownIcon } from "@chakra-ui/icons";
+
 interface optionProps {
   value: string;
   text: string;
 }
+interface DropdownProps {
+  term: string;
+  currentValue: string;
+  list: optionProps[];
+  handleChange: (term: string, value: string) => void;
+}
 
-export const Dropdown = ({ term, currentValue, list, handleChange }: any) => {
+export const Dropdown = ({
+  term,
+  currentValue,
+  list,
+  handleChange,
+}: DropdownProps) => {
   return (
     <>
       <Box>

@@ -10,8 +10,9 @@ import {
   Code,
 } from "@chakra-ui/react";
 import { StarIcon } from "@chakra-ui/icons";
+import { RepositoryProps } from "../interfaces/interface";
 
-export const Repository = ({ repository }: any) => {
+export const Repository = (props: RepositoryProps) => {
   return (
     <LinkBox
       w="280px"
@@ -26,13 +27,13 @@ export const Repository = ({ repository }: any) => {
       m={2}
     >
       <Heading size="md" my="1">
-        <LinkOverlay href={repository.html_url}>{repository.name}</LinkOverlay>
+        <LinkOverlay href={props.html_url}>{props.name}</LinkOverlay>
       </Heading>
       <Flex>
-        {repository.language && <Code>{repository.language}</Code>}
+        {props.language && <Code>{props.language}</Code>}
         <Spacer />
         <Tag size="sm" colorScheme="blue">
-          <TagLabel>{repository.stargazers_count}</TagLabel>
+          <TagLabel>{props.stargazers_count}</TagLabel>
           <TagRightIcon as={StarIcon} />
         </Tag>
       </Flex>

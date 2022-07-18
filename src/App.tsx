@@ -65,7 +65,7 @@ function App() {
       </Navbar>
       <Flex justify="space-between" wrap="wrap" maxW="960px" mx="auto" p={4}>
         {state.currentResult.map((repository: RepositoryProps) => (
-          <Repository key={repository.id} repository={repository} />
+          <Repository key={repository.id} {...repository} />
         ))}
       </Flex>
       {loading && <Loader />}

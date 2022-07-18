@@ -2,7 +2,12 @@ import { useState } from "react";
 import { HStack, Input, IconButton } from "@chakra-ui/react";
 import { SearchIcon } from "@chakra-ui/icons";
 
-export const SearchInput = ({ queryTerm, reset }: any) => {
+interface SearchInputProps {
+  queryTerm: string | null;
+  reset: () => void;
+}
+
+export const SearchInput = ({ queryTerm, reset }: SearchInputProps) => {
   const [input, setInput] = useState<string>(queryTerm || "");
 
   function handleSearch() {

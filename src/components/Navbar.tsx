@@ -1,6 +1,11 @@
+import React from "react";
 import { Box } from "@chakra-ui/react";
 
-export const Navbar = ({ children }: any) => {
+interface NavbarProps {
+  children: React.ReactNode;
+}
+
+export const Navbar = ({ children }: NavbarProps) => {
   return (
     <Box
       w="100vw"

@@ -42,7 +42,8 @@ Mainly complete the core function with **queryParamsReducer** and **useInfinityS
 3. Handle UI Stack(Error, Empty, and Loading) with **custom hooks**.
 
 ### Feature Improvement
-- Split the data-fetching function into reusable hooks.
+1. Split the data-fetching function into reusable hooks.
+2. Re-thinking the method to implement infinity scroll. (Easy to re-fetching with the same condition currently.)
 
 ## Install
 

@@ -33,12 +33,12 @@ export  function queryParamsReducer(
   ) {
     switch (action.type) {
       case QueryParamsActionKind.CHANGE_PARAMS:
-        const ChangeParamsAction = (action as ChangeParamsAction).payload;
+        const changeParamsPayload = (action as ChangeParamsAction).payload;
         return {
           ...state,
           page: 1,
           currentResult: [],
-          [ChangeParamsAction.name]: ChangeParamsAction.value,
+          [changeParamsPayload.name]: changeParamsPayload.value,
         };
       case QueryParamsActionKind.RESET_PAGE:
         return {
@@ -47,11 +47,11 @@ export  function queryParamsReducer(
           page: 1,
         };
       case QueryParamsActionKind.LOAD_NEXT_PAGE:
-        const LoadDataAction = (action as LoadDataAction).payload;
+        const loadDataPayload = (action as LoadDataAction).payload;
         return {
           ...state,
           page: state.page + 1,
-          currentResult: [...state.currentResult, ...LoadDataAction.nextPageData]
+          currentResult: [...state.currentResult, ...loadDataPayload.nextPageData]
         };
       case QueryParamsActionKind.NO_MORE_PAGE:
         return {
