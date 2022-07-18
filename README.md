@@ -56,7 +56,7 @@ git clone https://github.com/jiarongtsai/github-repository-list.git
 Go to the project directory
 
 ```properties
-cd github-repository-link
+cd github-repository-list
 ```
 
 Download dependencies
