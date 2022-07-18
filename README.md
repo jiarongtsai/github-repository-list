@@ -16,14 +16,16 @@ Mainly complete the core function with **queryParamsReducer** and **useInfinityS
 
 ### **queryParamsReducer (useReducer)**
     
-- Combine keywords, paging, conditions, and currently displayed data into a **state** objects. 
+- Combine paging, query conditions, and currently displayed data into a **state** objects. 
 - Use the reducer function to **organize the data processing logic**, improve maintainability and make code easier to read.
     
 ### **useInfinitySearch (hooks)**
     
 - Extract the useEffect with Infinity scroll and data-fetching in a custom hooks.
     
-- **Handle UI Stack** and **store data-fetching conditions(and results)** in the hooks, in order to simplify the logic of the main program. 
+- **Handle UI Stack** and **store data-fetching conditions(and results)** in a state, in order to simplify the logic of the main program. 
+
+- Prevent the intersection observer being invoked too frequently by debounce concept (use setTimeout API).
 
 
 ## Features
@@ -36,14 +38,11 @@ Mainly complete the core function with **queryParamsReducer** and **useInfinityS
 ### Optional
 
 1. Deploy on [Amazon S3](https://docs.aws.amazon.com/AmazonS3/latest/userguide/WebsiteHosting.html)  ([Demo link](http://www.github-repository-list.link/)).
-
 2. Prevent re-fetching data by storing in a **useState**.
-
 3. Handle UI Stack(Error, Empty, and Loading) with **custom hooks**.
 
 ### Feature Improvement
 1. Split the data-fetching function into reusable hooks.
-2. Re-thinking the method to implement infinity scroll. (Easy to re-fetching with the same condition currently.)
 
 ## Install
 
