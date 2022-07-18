@@ -28,6 +28,7 @@ function App() {
     endofPage,
     url:
       queryTerm &&
+      state.page &&
       `https://api.github.com/orgs/${queryTerm}/repos?page=${state.page}&type=${state.type}&sort=${state.sort}&direction=${state.direction}`,
     noMoreDataFunction: () =>
       dispatch({
@@ -72,7 +73,7 @@ function App() {
           ))}
         </HStack>
       </Navbar>
-      <Flex justify="space-between" wrap="wrap" maxW="960px" mx="auto" p={4}>
+      <Flex wrap="wrap" maxW="960px" mx="auto" p={4}>
         {state.currentResult.map((repository: RepositoryProps) => (
           <Repository key={repository.id} {...repository} />
         ))}
